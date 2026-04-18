@@ -32,11 +32,13 @@ ODOO_USER = os.getenv("ODOO_USER", "admin")
 ODOO_PASSWORD = os.getenv("ODOO_PASSWORD", "admin")
 
 
-def _jsonrpc(endpoint: str, params: dict) -> Any:
+def _jsonrpc(endpoint: str, params: dict, timeout: float = 180) -> Any:
+    # Timeout of 180s covers module installs (which reload the registry
+    # and can take 60-90 s on a fresh database).
     r = httpx.post(
         f"{ODOO_URL}/{endpoint}",
         json={"jsonrpc": "2.0", "method": "call", "params": params},
-        timeout=60,
+        timeout=timeout,
     )
     r.raise_for_status()
     body = r.json()
@@ -72,6 +74,29 @@ def _ensure(uid: int, model: str, domain: list, values: dict) -> int:
     if ids:
         return ids[0]
     return execute(uid, model, "create", values)
+
+
+def ensure_modules(uid: int, technical_names: list[str]) -> None:
+    """Install required Odoo modules if they aren't already.
+
+    A fresh Odoo 19 database only has the `base` module. For healthcare
+    accounting we need at minimum `account` (which pulls in `product`
+    as a dependency).
+    """
+    for tech in technical_names:
+        mod_ids = execute(uid, "ir.module.module", "search",
+                          [("name", "=", tech)], limit=1)
+        if not mod_ids:
+            print(f"  warn  module '{tech}' not found in registry")
+            continue
+        state = execute(uid, "ir.module.module", "read", mod_ids, ["state"])[0]["state"]
+        if state == "installed":
+            print(f"  ok    module '{tech}' already installed")
+            continue
+        print(f"  ...   installing module '{tech}' (state={state})...")
+        # This call can take 30-90 seconds; it reloads the registry.
+        execute(uid, "ir.module.module", "button_immediate_install", mod_ids)
+        print(f"  ok    module '{tech}' installed")
 
 
 # -----------------------------------------------------------------------------
@@ -136,7 +161,60 @@ INVOICES = [
 ]
 
 
+def purge_demo_data(uid: int, keep_customer_names: list[str]) -> None:
+    """Odoo installs demo records (Acme, Azure Interior, OpenWood, ...) with
+    the `account` module even when demo=False at DB-creation. Delete every
+    customer invoice + every customer partner that isn't in our healthcare
+    allowlist, so the CEO Briefing shows only the rows we seeded.
+
+    Idempotent: re-running on an already-clean DB is a no-op.
+    """
+    # 1. Delete every customer invoice whose partner isn't in our list.
+    keep_ids = []
+    for name in keep_customer_names:
+        ids = execute(uid, "res.partner", "search", [("name", "=", name)])
+        keep_ids.extend(ids)
+
+    foreign_invoice_ids = execute(
+        uid, "account.move", "search",
+        [("move_type", "in", ("out_invoice", "out_refund")),
+         ("partner_id", "not in", keep_ids)],
+    )
+    if foreign_invoice_ids:
+        try:
+            execute(uid, "account.move", "button_draft", foreign_invoice_ids)
+        except Exception:
+            pass  # may already be draft
+        try:
+            execute(uid, "account.move", "unlink", foreign_invoice_ids)
+            print(f"  purged {len(foreign_invoice_ids)} Odoo demo invoices")
+        except Exception as e:
+            print(f"  warn  could not unlink {len(foreign_invoice_ids)} demo invoices: {e}")
+
+    # 2. Archive (not delete — they have ledger refs) every customer partner
+    # not in our list. Archived partners are filtered out of most views.
+    foreign_partner_ids = execute(
+        uid, "res.partner", "search",
+        [("is_company", "=", True), ("id", "not in", keep_ids),
+         ("customer_rank", ">", 0)],
+    )
+    if foreign_partner_ids:
+        try:
+            execute(uid, "res.partner", "write", foreign_partner_ids, {"active": False})
+            print(f"  archived {len(foreign_partner_ids)} Odoo demo customers")
+        except Exception as e:
+            print(f"  warn  could not archive demo partners: {e}")
+
+
 def seed(uid: int) -> None:
+    print("Ensuring required Odoo modules are installed...")
+    ensure_modules(uid, ["account"])
+    print()
+
+    print("Purging Odoo's default demo data (Acme, Azure Interior, etc.)...")
+    purge_demo_data(uid, [c["name"] for c in CUSTOMERS])
+    print()
+
     print("Seeding customers...")
     customer_ids = []
     for c in CUSTOMERS:
@@ -154,6 +232,11 @@ def seed(uid: int) -> None:
 
     print("Seeding invoices...")
     for i, (ci, pi, inv_date, posted, paid) in enumerate(INVOICES, start=38):
+        ref = f"INV-2026-{i:03d}"
+        existing = execute(uid, "account.move", "search", [("ref", "=", ref)], limit=1)
+        if existing:
+            print(f"  skip  {ref}  (already exists, id={existing[0]})")
+            continue
         product = execute(uid, "product.product", "read", [product_ids[pi]], ["list_price", "name"])[0]
         move_id = execute(
             uid, "account.move", "create",
@@ -162,7 +245,7 @@ def seed(uid: int) -> None:
                 "move_type": "out_invoice",
                 "invoice_date": inv_date.isoformat(),
                 "invoice_date_due": (inv_date + timedelta(days=14)).isoformat(),
-                "ref": f"INV-2026-{i:03d}",
+                "ref": ref,
                 "invoice_line_ids": [(0, 0, {
                     "product_id": product_ids[pi],
                     "name": product["name"],
@@ -193,7 +276,7 @@ def seed(uid: int) -> None:
         else:
             print(f"  due   INV-2026-{i:03d}")
 
-    print("\nDone. Open http://localhost:8069 → Invoicing to see the seeded data.")
+    print("\nDone. Open http://localhost:8069 -> Invoicing to see the seeded data.")
 
 
 def main() -> None:

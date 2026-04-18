@@ -15,9 +15,15 @@ from pathlib import Path
 from typing import Any
 
 import httpx
+from dotenv import load_dotenv
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
+
+# Load .env before reading any ODOO_* env vars below so the MCP works
+# whether launched via `uv run python -m ...` or via Claude Code's
+# stdio MCP transport.
+load_dotenv()
 
 SERVER_NAME = "autosapien-odoo"
 VAULT = Path(os.getenv("VAULT_PATH", "./AI_Employee_Vault")).resolve()
@@ -95,14 +101,92 @@ _DEMO_SNAPSHOT = {
 
 
 def _safe_snapshot() -> dict:
-    """Try Odoo; fall back to seeded demo data so the CEO Briefing never crashes."""
+    """Query Odoo for real revenue/AR/expenses; gracefully fall back to
+    seeded demo data if Odoo is offline or authentication fails.
+
+    Shape (both modes):
+      {
+        "live": bool,             # True when live Odoo data is loaded
+        "source": "odoo" | "demo_fallback",
+        "revenue_mtd": float,     # sum of paid invoices this month
+        "bookings_mtd": float,    # sum of ALL posted invoices this month
+        "invoices_outstanding": [{customer, number, amount, due, days_late}],
+        "expenses_this_month": [{vendor, amount, category, flag?}],
+      }
+    """
+    from datetime import date, datetime, timedelta
+
     try:
         _login()
-        # Real implementation would pull account.move (invoices) and
-        # account.move.line (expenses). For the hackathon we still return
-        # the demo snapshot so the briefing demo runs reliably offline —
-        # but we mark `live: true` if we could authenticate.
-        return {**_DEMO_SNAPSHOT, "live": True, "source": "odoo"}
+        today = date.today()
+        first_of_month = date(today.year, today.month, 1)
+
+        # 1. Paid invoices this month — "collected" revenue.
+        paid_invoice_ids = _execute(
+            "account.move", "search",
+            [("move_type", "=", "out_invoice"),
+             ("state", "=", "posted"),
+             ("payment_state", "in", ("paid", "in_payment")),
+             ("invoice_date", ">=", first_of_month.isoformat())],
+        )
+        paid_invoices = _execute(
+            "account.move", "read", paid_invoice_ids,
+            ["amount_total", "invoice_date"],
+        ) if paid_invoice_ids else []
+        revenue_mtd = sum(i["amount_total"] for i in paid_invoices)
+
+        # 2. All posted invoices this month — "bookings" revenue.
+        booked_ids = _execute(
+            "account.move", "search",
+            [("move_type", "=", "out_invoice"),
+             ("state", "=", "posted"),
+             ("invoice_date", ">=", first_of_month.isoformat())],
+        )
+        booked = _execute(
+            "account.move", "read", booked_ids, ["amount_total"],
+        ) if booked_ids else []
+        bookings_mtd = sum(i["amount_total"] for i in booked)
+
+        # 3. Outstanding invoices (AR).
+        outstanding_ids = _execute(
+            "account.move", "search",
+            [("move_type", "=", "out_invoice"),
+             ("state", "=", "posted"),
+             ("payment_state", "in", ("not_paid", "partial"))],
+        )
+        outstanding_raw = _execute(
+            "account.move", "read", outstanding_ids,
+            ["name", "partner_id", "amount_residual", "invoice_date_due"],
+        ) if outstanding_ids else []
+        invoices_outstanding = []
+        for inv in outstanding_raw:
+            due_str = inv.get("invoice_date_due") or ""
+            try:
+                due = datetime.fromisoformat(due_str).date() if due_str else today
+            except ValueError:
+                due = today
+            days_late = max(0, (today - due).days)
+            partner_name = (inv["partner_id"][1] if inv.get("partner_id") else "Unknown")
+            invoices_outstanding.append({
+                "customer": partner_name,
+                "number": inv["name"],
+                "amount": inv["amount_residual"],
+                "due": due_str,
+                "days_late": days_late,
+            })
+        invoices_outstanding.sort(key=lambda x: -x["days_late"])
+
+        return {
+            "live": True,
+            "source": "odoo",
+            "revenue_mtd": revenue_mtd,
+            "bookings_mtd": bookings_mtd,
+            "invoices_outstanding": invoices_outstanding,
+            # Expenses aren't seeded in Odoo for this demo; carry the
+            # hand-curated list forward so the subscription-audit skill
+            # still has something to chew on.
+            "expenses_this_month": _DEMO_SNAPSHOT["expenses_this_month"],
+        }
     except Exception as e:  # noqa: BLE001
         return {**_DEMO_SNAPSHOT, "live": False, "source": "demo_fallback",
                 "reason": str(e)}
