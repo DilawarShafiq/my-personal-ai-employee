@@ -266,7 +266,7 @@ marketing.
 > action writes a JSONL audit line I can hand to a compliance reviewer.
 
 ### 7:50 – 8:00 — Outro
-> ***Outro card (3 s): "github.com/<your-handle>/... — DM me on LinkedIn"***
+> ***Outro card (3 s): "github.com/dilawarshafiq/autosapien-ai-employee — linkedin.com/in/dilawar-shafiq-b8923062"***
 >
 > That's the build. Local-first, HIPAA-aware, judge-reviewable. The
 > repo link is below. Thanks to Panaversity for the framing. DM me if
@@ -302,8 +302,8 @@ marketing.
 >
 > Built by Dilawar Gopang, CEO of autosapien (xEHR.io, rcmemployee.com). Local-first, HIPAA-aware, Claude Code + Obsidian + Python + MCP + Docker + Odoo 19.
 >
-> - GitHub: <your-repo-url>
-> - LinkedIn: <your-personal-profile>
+> - GitHub: https://github.com/dilawarshafiq/autosapien-ai-employee
+> - LinkedIn: https://www.linkedin.com/in/dilawar-shafiq-b8923062/
 > - Hackathon: https://forms.gle/JR9T1SJq5rmQyGkGA
 >
 > Chapters:

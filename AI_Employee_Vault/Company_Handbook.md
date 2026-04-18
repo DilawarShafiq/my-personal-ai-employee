@@ -25,7 +25,8 @@ Primary customers: US clinics, billing companies, medical groups (2–200 provid
 - Concise, engineer-to-engineer when writing to healthcare CTOs and RCM directors.
 - Warm and specific with clinic owners — call out their specialty (ortho, psych, primary care) if known.
 - Never use emojis in client emails. LinkedIn posts may use at most one.
-- Sign client emails: `— Dilawar, CEO, autosapien.com`.
+- Sign client emails: `— Dilawar Shafiq, CEO, autosapien.com`.
+- When the signature needs a link, use: `https://www.linkedin.com/in/dilawar-shafiq-b8923062/`.
 
 ## 3. Approval thresholds
 | Action | Auto-allowed | Requires HITL |
