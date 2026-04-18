@@ -2,6 +2,7 @@
 
 > **Tier:** Gold (+ Platinum-lite stretch)
 > **Author:** Dilawar Shafiq — CEO, [autosapien.com](https://autosapien.com) — builder of [xEHR.io](https://xEHR.io) and [rcmemployee.com](https://rcmemployee.com)
+> **Demo video:** 📹 [youtu.be/a3tDeFOB92U](https://youtu.be/a3tDeFOB92U)
 > **LinkedIn:** [linkedin.com/in/dilawar-shafiq-b8923062](https://www.linkedin.com/in/dilawar-shafiq-b8923062/)
 > **GitHub:** [github.com/dilawarshafiq/my-personal-ai-employee](https://github.com/dilawarshafiq/my-personal-ai-employee)
 > **Hackathon:** Panaversity *Personal AI Employee Hackathon 0 — Building Autonomous FTEs in 2026*
@@ -68,8 +69,21 @@ hackathon0_by_dilawar/
 ```
 
 ## Demo video
-See `docs/demo_script.md` for the 8-minute walkthrough shot list and
-`docs/production_guide.md` for the OBS + narration + upload checklist.
+
+**▶ Watch on YouTube: https://youtu.be/a3tDeFOB92U** (7:30)
+
+Covers all four tiers: Bronze watcher-wakes-agent demo, Silver triage +
+HITL + audit, Gold Monday CEO Briefing pulled from live Odoo, Ralph
+Wiggum Stop hook, Platinum-lite cloud/local delegation, and the
+security posture.
+
+For the raw assets used to build the video see:
+- `docs/production_guide.md` — 1,180-word word-for-word narration script
+- `docs/rendered/narration/` — 10 per-segment MP3s (edge-tts neural voice)
+- `docs/rendered/slides/` — 10 per-segment slide PNGs
+- `docs/rendered/demo_video.mp4` — the concatenated final video
+- `docs/thumbnail.svg` + `docs/rendered/thumbnail.png` — YouTube thumbnail
+- `scripts/generate_narration.py` + `scripts/build_demo_video.py` — reproducible build pipeline
 
 ## Troubleshooting FAQ
 
