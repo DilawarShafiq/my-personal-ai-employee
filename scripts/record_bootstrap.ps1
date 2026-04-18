@@ -1,4 +1,4 @@
-# Pre-record bootstrap — runs everything you need to hit F9 in OBS.
+# Pre-record bootstrap -- runs everything you need to hit F9 in OBS.
 #
 #   powershell -ExecutionPolicy Bypass -File scripts\record_bootstrap.ps1
 
@@ -9,7 +9,7 @@ try {
   docker compose ps --format json | Out-Null
   $status = docker compose ps --services --filter "status=running"
   if ($status -notmatch 'odoo') {
-    Write-Host "   Odoo not running — starting now..."
+    Write-Host "   Odoo not running -- starting now..."
     docker compose up -d
     Write-Host "   (waiting 60 s for Odoo to boot)"
     Start-Sleep -Seconds 60
@@ -17,7 +17,7 @@ try {
     Write-Host "   ok  Odoo already up"
   }
 } catch {
-  Write-Host "   warn  Docker not reachable — CEO briefing demo will use fallback data"
+  Write-Host "   warn  Docker not reachable -- CEO briefing demo will use fallback data"
 }
 
 Write-Host "`n[2/5] Re-seeding the vault to a pristine starting state..." -ForegroundColor Cyan
