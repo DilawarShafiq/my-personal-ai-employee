@@ -32,9 +32,9 @@ def main() -> None:
         print("Waiting up to 5 min for the chat list to appear...")
         try:
             page.wait_for_selector('[data-testid="chat-list"]', timeout=300_000)
-            print("Session captured. You can close the browser window.")
+            print("[OK] Session captured. You can close the browser window.")
         except Exception:
-            print("WARNING: chat list did not appear in 5 min.")
+            print("[WARN] Chat list did not appear in 5 min.")
             print("If you completed the QR scan, the session is probably saved anyway.")
 
 

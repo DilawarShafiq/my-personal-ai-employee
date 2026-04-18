@@ -32,9 +32,9 @@ def main() -> None:
         print("\nWaiting for you to finish logging in (up to 5 minutes)...")
         try:
             page.wait_for_url("**/feed/**", timeout=300_000)
-            print("✅  Session captured. You can close the browser.")
+            print("[OK] Session captured. You can close the browser.")
         except Exception:
-            print("⚠️  Did not reach the feed in time. If you logged in, session is still saved.")
+            print("[WARN] Did not reach the feed in time. If you logged in, the session is still saved to disk.")
         # Leave the browser open so the user can verify & close.
 
 
