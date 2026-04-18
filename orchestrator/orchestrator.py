@@ -60,6 +60,19 @@ def _start_watchers() -> list[threading.Thread]:
         except Exception as e:  # noqa: BLE001
             log.error("orchestrator.gmail_failed", error=str(e))
 
+    # Silver: WhatsApp watcher — second opt-in watcher.
+    if os.getenv("ENABLE_WHATSAPP_WATCHER", "false").lower() == "true":
+        try:
+            from watchers.whatsapp_watcher import WhatsAppWatcher  # lazy import
+
+            wa = WhatsAppWatcher(vault)
+            t = threading.Thread(target=wa.run, name="whatsapp-watcher", daemon=True)
+            t.start()
+            threads.append(t)
+            log.info("orchestrator.watcher.started", name="whatsapp")
+        except Exception as e:  # noqa: BLE001
+            log.error("orchestrator.whatsapp_failed", error=str(e))
+
     # Silver: approval executor — the HITL bridge. Always on.
     t = threading.Thread(target=run_approval_watcher, name="approval-watcher", daemon=True)
     t.start()

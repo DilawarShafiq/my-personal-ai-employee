@@ -30,6 +30,8 @@ from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
 
+from orchestrator.retry import with_retry
+
 SERVER_NAME = "autosapien-email"
 VAULT = Path(os.getenv("VAULT_PATH", "./AI_Employee_Vault")).resolve()
 APPROVED = VAULT / "Approved"
@@ -77,8 +79,13 @@ def _approval_file_for(msg_id: str) -> Path | None:
     return candidates[0] if candidates else None
 
 
+@with_retry(max_attempts=3, base_delay=1.0, max_delay=10.0)
 def _gmail_service():
-    """Lazy-build a Gmail API client; returns None when credentials missing."""
+    """Lazy-build a Gmail API client; returns None when credentials missing.
+
+    Wrapped in with_retry so a transient OAuth refresh hiccup or a flaky
+    googleapi discovery call doesn't take down a whole send.
+    """
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
     from googleapiclient.discovery import build

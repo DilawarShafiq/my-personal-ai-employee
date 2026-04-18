@@ -66,7 +66,74 @@ hackathon0_by_dilawar/
 ```
 
 ## Demo video
-See `docs/demo_script.md` for the 8-minute walkthrough shot list.
+See `docs/demo_script.md` for the 8-minute walkthrough shot list and
+`docs/production_guide.md` for the OBS + narration + upload checklist.
+
+## Troubleshooting FAQ
+
+**Claude Code says the MCP server won't start.**
+Run `uv sync` once in the repo root — the MCP servers execute via
+`uv run`, and if the lockfile is stale the command silently errors.
+Check `.mcp.json` has absolute paths or is being resolved from the
+repo root.
+
+**The orchestrator starts, but no watcher is firing.**
+By default only the filesystem watcher runs. Opt into the others by
+setting `ENABLE_GMAIL_WATCHER=true` and/or `ENABLE_WHATSAPP_WATCHER=true`
+in `.env` and restarting. Gmail also needs `secrets/gmail_credentials.json`.
+
+**Ralph hook never re-injects.**
+Check `.claude/settings.json` > `hooks.Stop`. On Windows the bash script
+needs Git Bash on PATH; if you use pwsh, swap the `command` to
+`./.claude/hooks/ralph_stop.ps1` and `shell` to `powershell`.
+
+**Odoo MCP returns `live: false` with seed data.**
+Expected when Docker isn't running. Bring Odoo up with
+`docker compose up -d` and wait ~90 seconds for the DB to init.
+
+**YAML "mapping values not allowed" in the approval log.**
+A frontmatter field (usually `subject`) contains an unquoted colon
+(e.g. `subject: Re: foo`). Always quote free-text fields:
+`subject: "Re: foo"`. The `draft-reply` skill template already does this.
+
+**Playwright browser doesn't launch (LinkedIn / WhatsApp).**
+Run once: `uv run playwright install chromium`.
+
+**Windows Task Scheduler script says "scripts are disabled".**
+Launch an elevated PowerShell and run once:
+`Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`.
+
+## Ethics & responsible automation
+
+This AI Employee operates under Dilawar's name, using his credentials,
+on his behalf. That is a deliberate design choice, not a technical
+accident. The safeguards baked into the repo — HITL on every send, PHI
+redaction at ingress, DRY_RUN-by-default, brand guards at the MCP
+layer, rate limits in code — all exist because **the human remains
+accountable**, full stop.
+
+Things this AI is *never allowed* to do autonomously:
+
+| Surface | Why |
+|---|---|
+| Sign contracts or BAAs | Legally binding, always human. |
+| Respond to press / podcast / speaking inquiries | Reputation-level. |
+| Send condolence messages or handle grief contexts | Emotional nuance. |
+| Initiate payments to a **new** recipient | Fraud vector. |
+| Post to autosapien / xEHR.io / rcmemployee.com pages (phase 1) | Brand guardrail; social MCP refuses this at the server layer. |
+| Touch anything containing patient PHI | Hard rule in `Company_Handbook.md § 1`. |
+
+Recommended oversight cadence, borrowed from the hackathon spec:
+
+- **Daily:** 2-minute Dashboard glance.
+- **Weekly:** 15-minute `Logs/*.jsonl` review.
+- **Monthly:** 1-hour comprehensive audit (approvals, rejections, what
+  the AI got wrong).
+- **Quarterly:** Full security + access review; rotate credentials.
+
+If you fork this to run your own AI employee, please keep these
+guardrails. The system works because the guardrails are there — not
+because the guardrails are noise around a working system.
 
 ## License
 MIT. Fake customer names in seed data are fictional; any resemblance to real clinics is coincidental.
