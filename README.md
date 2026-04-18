@@ -3,7 +3,7 @@
 > **Tier:** Gold (+ Platinum-lite stretch)
 > **Author:** Dilawar Shafiq — CEO, [autosapien.com](https://autosapien.com) — builder of [xEHR.io](https://xEHR.io) and [rcmemployee.com](https://rcmemployee.com)
 > **LinkedIn:** [linkedin.com/in/dilawar-shafiq-b8923062](https://www.linkedin.com/in/dilawar-shafiq-b8923062/)
-> **GitHub:** [github.com/dilawarshafiq/autosapien-ai-employee](https://github.com/dilawarshafiq/autosapien-ai-employee)
+> **GitHub:** [github.com/dilawarshafiq/my-personal-ai-employee](https://github.com/dilawarshafiq/my-personal-ai-employee)
 > **Hackathon:** Panaversity *Personal AI Employee Hackathon 0 — Building Autonomous FTEs in 2026*
 
 A local-first, HIPAA-aware Digital FTE that runs my healthcare-RCM startup's day-to-day work on autopilot. Watchers see the world, Claude Code reasons, Agent Skills codify the playbook, and MCP servers are the hands. Everything non-trivial requires human-in-the-loop approval by file movement — the AI can draft, but only the CEO can send, pay, or post.
@@ -26,8 +26,8 @@ A local-first, HIPAA-aware Digital FTE that runs my healthcare-RCM startup's day
 ## Quickstart (Bronze — runs in 60 seconds)
 ```bash
 # Prereqs: Python 3.11+, uv (https://github.com/astral-sh/uv)
-git clone https://github.com/dilawarshafiq/autosapien-ai-employee
-cd autosapien-ai-employee
+git clone https://github.com/dilawarshafiq/my-personal-ai-employee
+cd my-personal-ai-employee
 
 uv sync                                     # install deps
 cp .env.example .env                        # DRY_RUN=true is the default
