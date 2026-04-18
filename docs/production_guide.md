@@ -152,6 +152,21 @@ Pauses noted with `[...]`. Screen actions in **bold-italic**.
 > JSONL audit line: timestamp, actor, action type, approval status,
 > approved_by human, result success.
 
+### Narration nuance: email "send" is simulated
+
+In the real-Gmail / dry-run-sends configuration, when you drag an
+approval to `/Approved/`, the email MCP logs what it *would* have sent
+and moves the file to `/Done/`. Your on-screen call-out:
+
+> *"DRY_RUN is still true for email — so this is a simulated send, but
+> the approval pipeline is real. You can see the full send-ready draft
+> in the audit log. One flip of `LIVE_CHANNELS` and it ships. I keep
+> it safe for demos."*
+
+This is actually a stronger narrative than "watch a real email leave"
+— it shows the judges that your security posture is code-level, not
+marketing.
+
 ### 3:30 – 4:30 — Gold: the Monday Morning CEO Briefing
 > ***Terminal: `uv run python scripts/trigger_ceo_briefing.py`***
 >

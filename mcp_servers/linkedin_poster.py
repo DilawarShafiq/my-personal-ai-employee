@@ -15,10 +15,19 @@ from pathlib import Path
 
 
 def post(content: str, *, dry_run: bool = True) -> bool:
-    """Post to LinkedIn using the persisted Playwright session."""
-    if dry_run:
+    """Post to LinkedIn using the persisted Playwright session.
+
+    Per-channel override: even when dry_run=True, if LIVE_CHANNELS contains
+    'linkedin' the post goes live. Used for the "real LinkedIn post,
+    dry-run everything else" demo configuration.
+    """
+    live_channels = {c.strip().lower() for c in os.getenv("LIVE_CHANNELS", "").split(",") if c.strip()}
+    force_live = "linkedin" in live_channels
+    if dry_run and not force_live:
         print(f"[DRY RUN] Would post to LinkedIn ({len(content)} chars):\n---\n{content[:240]}\n---")
         return True
+    if force_live:
+        print(f"[LIVE overridden via LIVE_CHANNELS=linkedin] Posting {len(content)} chars...")
 
     session_path = Path(os.getenv("LINKEDIN_SESSION_PATH", "./secrets/linkedin_session"))
     if not session_path.exists():
