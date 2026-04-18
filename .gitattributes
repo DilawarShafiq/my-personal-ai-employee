@@ -1,0 +1,20 @@
+# Keep LF everywhere — Ralph Stop hook bash script chokes on CRLF.
+* text=auto eol=lf
+
+# Shell scripts MUST be LF even on Windows checkouts.
+*.sh text eol=lf
+.claude/hooks/* text eol=lf
+
+# Python files — LF for cross-platform parity.
+*.py text eol=lf
+
+# Markdown — LF to avoid churn.
+*.md text eol=lf
+
+# PowerShell — let Windows use CRLF (native).
+*.ps1 text eol=crlf
+
+# Binary assets untouched.
+*.png binary
+*.jpg binary
+*.pdf binary

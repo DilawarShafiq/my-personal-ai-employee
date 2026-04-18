@@ -1,0 +1,54 @@
+# Self-hosted Odoo 19 Community for the autosapien.com accounting domain.
+#
+# Usage:
+#     docker compose up -d          # boot Odoo + Postgres
+#     open http://localhost:8069    # first run: create DB "autosapien"
+#     docker compose logs -f odoo   # watch logs
+#     docker compose down           # stop; volumes persist
+#
+# Why 19? The JSON-RPC API (external_api) is stable and matches the
+# hackathon spec. Switch images to `odoo:18` if you need LTS.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: autosapien-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  odoo:
+    image: odoo:19
+    container_name: autosapien-odoo
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "8069:8069"
+      - "8072:8072"   # longpolling
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: odoo
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ./odoo/addons:/mnt/extra-addons
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8069/web/login"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  odoo_data:

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "enabledMcpjsonServers": [
+    "autosapien-email",
+    "autosapien-odoo",
+    "autosapien-social"
+  ],
+  "permissions": {
+    "allow": [
+      "Read(./AI_Employee_Vault/**)",
+      "Write(./AI_Employee_Vault/**)",
+      "Edit(./AI_Employee_Vault/**)",
+      "Bash(uv run *)",
+      "Bash(python watchers/*.py)",
+      "Bash(python orchestrator/*.py)",
+      "Bash(python scripts/*.py)",
+      "Bash(docker compose *)",
+      "Bash(git status)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./secrets/**)",
+      "Write(./.env)",
+      "Write(./secrets/**)",
+      "Bash(curl * | sh)",
+      "Bash(rm -rf *)"
+    ]
+  },
+  "env": {
+    "VAULT_PATH": "./AI_Employee_Vault",
+    "DRY_RUN": "true",
+    "RALPH_MAX_ITERATIONS": "8"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "./.claude/hooks/ralph_stop.sh",
+            "timeout": 30,
+            "statusMessage": "Ralph: checking if queue is drained..."
+          }
+        ]
+      }
+    ]
+  }
+}

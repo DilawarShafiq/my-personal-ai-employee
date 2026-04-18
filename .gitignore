@@ -1,0 +1,50 @@
+# Secrets (NEVER COMMIT)
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+credentials.json
+token.json
+oauth_*.json
+whatsapp_session/
+browser_state/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.uv/
+uv.lock
+
+# Obsidian workspace (optional personal state)
+AI_Employee_Vault/.obsidian/workspace*
+AI_Employee_Vault/.obsidian/cache
+
+# Runtime / state (do sync markdown content, don't sync transient state)
+AI_Employee_Vault/.claim_locks/
+*.pid
+*.log
+logs/
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Docker / Odoo
+odoo_data/
+postgres_data/

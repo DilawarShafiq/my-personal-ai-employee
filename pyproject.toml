@@ -1,0 +1,55 @@
+[project]
+name = "autosapien-ai-employee"
+version = "0.1.0"
+description = "Personal AI Employee for autosapien.com — HIPAA-flavored autonomous FTE built on Claude Code + Obsidian + MCP."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Dilawar Gopang", email = "dilawar.gopang@gmail.com" }]
+license = { text = "MIT" }
+
+dependencies = [
+    # Watchers
+    "watchdog>=4.0",
+    "python-dotenv>=1.0",
+    # Gmail (Silver)
+    "google-api-python-client>=2.120",
+    "google-auth-oauthlib>=1.2",
+    "google-auth-httplib2>=0.2",
+    # Web automation (LinkedIn / WhatsApp / HITL browser fallback)
+    "playwright>=1.45",
+    # Odoo JSON-RPC (Gold)
+    "httpx>=0.27",
+    # Data / briefing
+    "pydantic>=2.6",
+    "python-dateutil>=2.9",
+    "rich>=13.7",
+    # MCP servers
+    "mcp>=1.0",
+    # Observability
+    "structlog>=24.1",
+    # YAML parsing for vault frontmatter (used by approval_watcher)
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.4",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+autosapien-orchestrator = "orchestrator.orchestrator:main"
+autosapien-watchdog = "orchestrator.watchdog:main"
+autosapien-seed = "scripts.seed_vault:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["watchers", "mcp_servers", "orchestrator", "scripts"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

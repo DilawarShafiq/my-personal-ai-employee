@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/mcp.json",
+  "mcpServers": {
+    "autosapien-email": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "mcp_servers.email_mcp.server"],
+      "env": {
+        "VAULT_PATH": "./AI_Employee_Vault",
+        "DRY_RUN": "true"
+      }
+    },
+    "autosapien-odoo": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "mcp_servers.odoo_mcp.server"],
+      "env": {
+        "VAULT_PATH": "./AI_Employee_Vault",
+        "DRY_RUN": "true",
+        "ODOO_URL": "http://localhost:8069"
+      }
+    },
+    "autosapien-social": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "mcp_servers.social_mcp.server"],
+      "env": {
+        "VAULT_PATH": "./AI_Employee_Vault",
+        "DRY_RUN": "true"
+      }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "Inbox",
+  "attachmentFolderPath": "attachments",
+  "useMarkdownLinks": true,
+  "showLineNumber": true,
+  "defaultViewMode": "source"
+}
