@@ -42,9 +42,11 @@ Then open the `AI_Employee_Vault/` folder in Obsidian and point Claude Code at t
 
 | Endpoint | URL | Status |
 |---|---|---|
-| Main site | https://54.148.93.226.nip.io/ | HTTP 200, Let's Encrypt cert valid |
-| Odoo login | https://54.148.93.226.nip.io/odoo/web/login | admin / admin (demo account — rotate for prod) |
-| Odoo JSON-RPC | https://54.148.93.226.nip.io/odoo/jsonrpc | Returns `["autosapien"]` for `db.list` |
+| Odoo (root) | https://54.148.93.226.nip.io/ | HTTP 200, redirects to /web/login — Let's Encrypt cert valid |
+| Odoo login | https://54.148.93.226.nip.io/web/login | admin / admin (demo account — rotate for prod) |
+| Odoo JSON-RPC | https://54.148.93.226.nip.io/jsonrpc | Returns `["autosapien"]` for `db.list` |
+| Health | https://54.148.93.226.nip.io/healthz | `{"ok":true,"heartbeat_age_s":...}` |
+| Metrics | https://54.148.93.226.nip.io/metrics | Gmail queue depth, in-progress counts |
 
 Stack running on AWS t3.micro in us-west-2:
 - Caddy 2.10 with auto-issued Let's Encrypt cert for `*.nip.io` wildcard
