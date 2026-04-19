@@ -7,11 +7,11 @@
 # Set DOMAIN + ADMIN_EMAIL in .env.cloud before launching.
 
 {
-    email {env.ADMIN_EMAIL}
+    email {$ADMIN_EMAIL}
     admin off
 }
 
-{env.DOMAIN} {
+{$DOMAIN} {
     encode gzip
 
     # Healthcheck — always-200 when internal stack is green.
