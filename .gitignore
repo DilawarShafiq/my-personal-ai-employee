@@ -2,7 +2,15 @@
 .env
 .env.*
 !.env.example
+!.env.cloud.example
 secrets/
+
+# Cloud deployment runtime state (VPC/subnet/sg IDs, public IPs) —
+# operational, not sensitive but not useful to others either.
+deploy/cloud/aws_state.env
+deploy/cloud/.env.cloud
+deploy/cloud/secrets/
+
 *.pem
 *.key
 credentials.json
