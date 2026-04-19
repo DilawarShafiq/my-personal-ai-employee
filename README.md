@@ -1,6 +1,6 @@
 # autosapien.com — Personal AI Employee (Hackathon 0 submission)
 
-> **Tier:** Gold (+ Platinum-lite stretch)
+> **Tier:** **Pure Platinum** — live cloud deployment at https://54.148.93.226.nip.io (AWS t3.micro in us-west-2, HTTPS via Let's Encrypt, healthcare-seeded Odoo 19)
 > **Author:** Dilawar Shafiq — CEO, [autosapien.com](https://autosapien.com) — builder of [xEHR.io](https://xEHR.io) and [rcmemployee.com](https://rcmemployee.com)
 > **Demo video:** 📹 [youtu.be/a3tDeFOB92U](https://youtu.be/a3tDeFOB92U)
 > **LinkedIn:** [linkedin.com/in/dilawar-shafiq-b8923062](https://www.linkedin.com/in/dilawar-shafiq-b8923062/)
@@ -37,6 +37,24 @@ uv run autosapien-orchestrator               # starts filesystem watcher
 ```
 
 Then open the `AI_Employee_Vault/` folder in Obsidian and point Claude Code at this directory — `triage-inbox` will find the seeded messages.
+
+## Live production deployment (Platinum, pure)
+
+| Endpoint | URL | Status |
+|---|---|---|
+| Main site | https://54.148.93.226.nip.io/ | HTTP 200, Let's Encrypt cert valid |
+| Odoo login | https://54.148.93.226.nip.io/odoo/web/login | admin / admin (demo account — rotate for prod) |
+| Odoo JSON-RPC | https://54.148.93.226.nip.io/odoo/jsonrpc | Returns `["autosapien"]` for `db.list` |
+
+Stack running on AWS t3.micro in us-west-2:
+- Caddy 2.10 with auto-issued Let's Encrypt cert for `*.nip.io` wildcard
+- Odoo 19 Community with `proxy_mode=True` for HTTPS-forwarded headers
+- Postgres 16 with auto-generated 32-char DB password
+- Seeded with 6 healthcare customers / 4 products / 7 invoices (4 paid, 3 outstanding)
+
+All billable AWS resources tagged `Project=autosapien-hackathon0` so you can
+filter + delete from the EC2 console in one click. Full deployment runbook
+at `docs/platinum_deploy.md`.
 
 ## Tier progression
 - **Bronze** — vault + filesystem watcher + `triage-inbox` Agent Skill. Runs anywhere.
