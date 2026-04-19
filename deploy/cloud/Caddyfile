@@ -1,0 +1,51 @@
+# Caddy config for the autosapien cloud stack.
+# HTTPS auto-provisioned via Let's Encrypt. Handles three routes:
+#   /healthz   -> healthcheck service
+#   /odoo/*    -> Odoo (rewritten, proxy_mode=true in odoo.conf)
+#   /          -> 404 with a terse message (don't leak service detection)
+#
+# Set DOMAIN + ADMIN_EMAIL in .env.cloud before launching.
+
+{
+    email {env.ADMIN_EMAIL}
+    admin off
+}
+
+{env.DOMAIN} {
+    encode gzip
+
+    # Healthcheck — always-200 when internal stack is green.
+    handle /healthz {
+        reverse_proxy healthcheck:8080
+    }
+    handle /metrics {
+        reverse_proxy healthcheck:8080
+    }
+    handle /livez {
+        reverse_proxy healthcheck:8080
+    }
+
+    # Odoo — longpolling on /websocket and the /web/database endpoints need
+    # the HOST header and X-Forwarded-Proto for proxy_mode=True to work.
+    handle_path /odoo/websocket* {
+        reverse_proxy odoo:8072
+    }
+    handle_path /odoo/* {
+        reverse_proxy odoo:8069 {
+            header_up X-Forwarded-Host {host}
+            header_up X-Forwarded-Proto https
+            header_up X-Real-IP {remote}
+        }
+    }
+
+    handle {
+        respond "autosapien AI Employee — cloud node" 200
+    }
+
+    log {
+        output file /data/access.log {
+            roll_size 100mb
+            roll_keep 5
+        }
+    }
+}

@@ -1,0 +1,145 @@
+# =============================================================================
+# Platinum tier cloud stack: autosapien-cloud + Odoo 19 + Postgres + Caddy +
+# nightly backups + healthcheck endpoint.
+#
+# Bring up:
+#   cd deploy/cloud
+#   cp .env.cloud.example .env.cloud   # fill in DOMAIN + Gmail creds
+#   docker compose --env-file .env.cloud -f docker-compose.cloud.yml up -d
+#
+# Verify:
+#   curl https://${DOMAIN}/healthz   # 200 OK
+#   curl https://${DOMAIN}/odoo/     # Odoo login page (via Caddy)
+# =============================================================================
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: autosapien-cloud-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: ${ODOO_DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  odoo:
+    image: odoo:19
+    container_name: autosapien-cloud-odoo
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: ${ODOO_DB_PASSWORD}
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ../../odoo/config/odoo.conf:/etc/odoo/odoo.conf:ro
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8069/web/login"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  autosapien-cloud:
+    build:
+      context: ../..
+      dockerfile: deploy/cloud/Dockerfile
+    container_name: autosapien-cloud-agent
+    depends_on:
+      odoo:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      AUTOSAPIEN_ROLE: cloud
+      VAULT_PATH: /vault
+      DRY_RUN: "true"
+      ENABLE_GMAIL_WATCHER: "true"
+      ENABLE_WHATSAPP_WATCHER: "false"   # hard-off; also fail-closed in code
+      ODOO_URL: http://odoo:8069
+      ODOO_DB: autosapien
+      ODOO_USER: admin
+      ODOO_PASSWORD: ${ODOO_DB_PASSWORD}
+      GMAIL_CREDENTIALS_PATH: /secrets/gmail_credentials.json
+      GMAIL_TOKEN_PATH: /secrets/gmail_token.json
+    volumes:
+      - vault:/vault                           # shared with the git-sync sidecar
+      - ./secrets:/secrets:ro                  # Cloud OAuth creds (NO banking, NO WhatsApp)
+
+  vault-sync:
+    image: alpine/git:latest
+    container_name: autosapien-cloud-vault-sync
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/sync/vault_sync.sh"]
+    environment:
+      VAULT_REPO_URL: ${VAULT_REPO_URL}        # git URL for the vault-only repo
+      VAULT_BRANCH: ${VAULT_BRANCH:-main}
+      GIT_USER_EMAIL: ${GIT_USER_EMAIL:-cloud-agent@autosapien.example}
+      GIT_USER_NAME: ${GIT_USER_NAME:-cloud-agent}
+    volumes:
+      - vault:/vault
+      - ./scripts/vault_sync.sh:/sync/vault_sync.sh:ro
+      - ./secrets/git_deploy_key:/root/.ssh/id_ed25519:ro
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: autosapien-cloud-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN: ${DOMAIN}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+
+  healthcheck:
+    build:
+      context: ../..
+      dockerfile: deploy/cloud/Dockerfile.healthcheck
+    container_name: autosapien-cloud-healthcheck
+    restart: unless-stopped
+    environment:
+      ODOO_URL: http://odoo:8069
+      VAULT_PATH: /vault
+    volumes:
+      - vault:/vault:ro
+
+  backup:
+    image: postgres:16-alpine
+    container_name: autosapien-cloud-backup
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/backup/backup_odoo.sh"]
+    environment:
+      PGHOST: db
+      PGUSER: odoo
+      PGPASSWORD: ${ODOO_DB_PASSWORD}
+      PGDATABASE: autosapien
+      B2_APPLICATION_KEY_ID: ${B2_APPLICATION_KEY_ID:-}
+      B2_APPLICATION_KEY: ${B2_APPLICATION_KEY:-}
+      B2_BUCKET: ${B2_BUCKET:-}
+    volumes:
+      - ./scripts/backup_odoo.sh:/backup/backup_odoo.sh:ro
+      - backups:/var/backups/odoo
+
+volumes:
+  postgres_data:
+  odoo_data:
+  vault:
+  backups:
+  caddy_data:
+  caddy_config:

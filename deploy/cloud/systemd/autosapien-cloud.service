@@ -1,0 +1,15 @@
+[Unit]
+Description=autosapien AI Employee — cloud stack (compose)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/root/autosapien/deploy/cloud
+ExecStart=/usr/bin/docker compose --env-file .env.cloud -f docker-compose.cloud.yml up -d
+ExecStop=/usr/bin/docker compose --env-file .env.cloud -f docker-compose.cloud.yml down
+
+[Install]
+WantedBy=multi-user.target

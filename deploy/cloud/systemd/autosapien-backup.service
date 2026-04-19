@@ -1,0 +1,12 @@
+[Unit]
+Description=autosapien AI Employee — nightly Odoo backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/docker compose -f /root/autosapien/deploy/cloud/docker-compose.cloud.yml --env-file /root/autosapien/deploy/cloud/.env.cloud run --rm backup
+User=root
+
+[Install]
+WantedBy=multi-user.target
