@@ -42,7 +42,10 @@ services:
       PASSWORD: ${ODOO_DB_PASSWORD}
     volumes:
       - odoo_data:/var/lib/odoo
-      - ../../odoo/config/odoo.conf:/etc/odoo/odoo.conf:ro
+      # Cloud-specific config — no hardcoded db_password, so the
+      # POSTGRES_PASSWORD env var from db + the PASSWORD env var here
+      # drive authentication instead of the local-dev odoo.conf.
+      - ./odoo-cloud.conf:/etc/odoo/odoo.conf:ro
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8069/web/login"]
       interval: 20s
