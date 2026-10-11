@@ -1,10 +1,12 @@
-# autosapien.com — Personal AI Employee (Hackathon 0 submission)
+# Personal AI Employee (Hackathon 0 submission)
 
-> **Tier:** **Pure Platinum** — live cloud deployment at https://54.148.93.226.nip.io (AWS t3.micro in us-west-2, HTTPS via Let's Encrypt, healthcare-seeded Odoo 19)
-> **Author:** Dilawar Shafiq — CEO, [autosapien.com](https://autosapien.com) — builder of [xEHR.io](https://xEHR.io) and [rcmemployee.com](https://rcmemployee.com)
+![Personal AI Employee: it drafts, you approve](assets/banner.png)
+
+> **Tier:** **Pure Platinum** — live cloud deployment at https://54.148.93.226.nip.io (HTTPS via Let's Encrypt, healthcare-seeded Odoo 19)
+> **Author:** Dilawar Shafiq — CEO, Autosapien ([autosapien.com](https://autosapien.com)), builder of XEHR ([xehr.io](https://xehr.io)) and RCM Employee ([rcmemployee.com](https://rcmemployee.com))
 > **Demo video:** 📹 [youtu.be/a3tDeFOB92U](https://youtu.be/a3tDeFOB92U)
 > **LinkedIn:** [linkedin.com/in/dilawar-shafiq-b8923062](https://www.linkedin.com/in/dilawar-shafiq-b8923062/)
-> **GitHub:** [github.com/dilawarshafiq/my-personal-ai-employee](https://github.com/dilawarshafiq/my-personal-ai-employee)
+> **GitHub:** [github.com/DilawarShafiq/my-personal-ai-employee](https://github.com/DilawarShafiq/my-personal-ai-employee)
 > **Hackathon:** Panaversity *Personal AI Employee Hackathon 0 — Building Autonomous FTEs in 2026*
 
 A local-first, HIPAA-aware Digital FTE that runs my healthcare-RCM startup's day-to-day work on autopilot. Watchers see the world, Claude Code reasons, Agent Skills codify the playbook, and MCP servers are the hands. Everything non-trivial requires human-in-the-loop approval by file movement — the AI can draft, but only the CEO can send, pay, or post.
